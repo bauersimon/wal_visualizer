@@ -1,0 +1,72 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Wed Jul 26 14:19:46 2023
+[*]
+[dumpfile] "/home/simon/repos/wal_visualizer/examples/cache/vexriscv-cached.fst"
+[dumpfile_mtime] "Mon Jul 17 15:36:27 2023"
+[dumpfile_size] 15121160
+[savefile] "/home/simon/repos/wal_visualizer/examples/cache/vexriscv-cached.gtkw"
+[timestart] 81631
+[size] 1908 999
+[pos] 65503 65503
+*-2.000000 81636 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.VexRiscv.
+[sst_width] 294
+[signals_width] 338
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.clk
+@200
+-ICache - CPU (BUS)
+-Out
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isValid
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isStuck
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isRemoved
+@22
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_pc[31:0]
+@200
+-In
+@22
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_data[31:0]
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_cacheMiss
+@22
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_physicalAddress[31:0]
+@200
+-ICache - Mem (BUS)
+-Command
+@22
+TOP.VexRiscv.iBus_cmd_payload_address[31:0]
+@28
+TOP.VexRiscv.iBus_cmd_payload_size[2:0]
+TOP.VexRiscv.iBus_cmd_ready
+TOP.VexRiscv.iBus_cmd_valid
+@200
+-Response
+@22
+TOP.VexRiscv.iBus_rsp_payload_data[31:0]
+@28
+TOP.VexRiscv.iBus_rsp_payload_error
+TOP.VexRiscv.iBus_rsp_valid
+@201
+-"Fill"
+@22
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fill_payload[31:0]
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fill_valid
+@200
+-"Prefetch"
+-In
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_haltIt
+@200
+-Out
+@28
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_isValid
+@22
+TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_pc[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
