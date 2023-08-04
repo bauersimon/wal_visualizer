@@ -20,8 +20,8 @@
     [(&& (empty idx-rq) (empty idx-rs)) (list)]
     ; Append "-1" for as long as there are no responses anymore.
     [(empty idx-rs) (+ (list -1) (latency (rest idx-rq) (list)))]
-    ; Append "-1" for as long as there are no request anymore.
-    [(empty idx-rq) (+ (list -1) (latency (list) (rest idx-rs)))]
+    ; Done when there are no request anymore.
+    [(empty idx-rq) (list)]
     ; Default: Compute latency.
     [#t
      (let ([rq (first idx-rq)] [rs (first idx-rs)])
@@ -31,8 +31,8 @@
           (+ (list -1) (latency (rest idx-rq) idx-rs))]
          ; Valid response.
          [(>= rs rq) (+ (list (- rs rq)) (latency (rest idx-rq) (rest idx-rs)))]
-         ; Invalid response.
-         [#t (+ (list -1) (latency idx-rq (rest idx-rs)))]))]))
+         ; Ignore invalid response.
+         [#t (latency idx-rq (rest idx-rs))]))]))
 
 ; Tests.
 
@@ -40,8 +40,8 @@
   (call utils.test "Empty" (list) (latency (list) (list)))
   (call utils.test "Simple" (list 0 1 4) (latency (list 1 3 5) (list 1 4 9)))
   (call utils.test "No Responses End" (list 0 1 -1 -1) (latency (list 1 3 7 8) (list 1 4)))
-  (call utils.test "No Requests End" (list 0 1 -1 -1) (latency (list 1 3) (list 1 4 7 9)))
+  (call utils.test "No Requests End" (list 0 1) (latency (list 1 3) (list 1 4 7 9)))
   (call utils.test "No Response" (list 0 1 -1 1) (latency (list 1 3 7 8) (list 1 4 9)))
-  (call utils.test "Duplicated Response" (list 0 1 -1 1) (latency (list 1 3 8) (list 1 4 7 9)))
-  (call utils.test "Complex" (list 0 -1 2 -1 3 -1) (latency (list 1 3 8 10 15) (list 1 2 5 13)))
+  (call utils.test "Duplicated Response" (list 0 1 1) (latency (list 1 3 8) (list 1 4 7 9)))
+  (call utils.test "Complex" (list 0 2 -1 3 -1) (latency (list 1 3 8 10 15) (list 1 2 5 13)))
   (call utils.test "Filter" (list 0 2 3) (filter int-pos (list 0 -1 2 -1 3 -1))))
