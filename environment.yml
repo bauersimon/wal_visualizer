@@ -2,9 +2,11 @@ name: wal_visualizer
 channels:
   - defaults
 dependencies:
+  - matplotlib=3.7.1
   - numpy=1.25.0
   - pip=23.1.2
   - python=3.11
+  - scipy=1.10.1
   - pip:
     - git+https://github.com/ics-jku/wal.git
     - requests==2.31.0
