@@ -25,6 +25,9 @@ def hit_ratio(latency: List[Union[int, float]], hit_threshold: float = 0.0) -> f
     l = np.where(l < 0, np.ones_like(l) * hit_threshold + 1, l)
 
     hits = l <= hit_threshold
+
+    if hits.shape[0] == 0:
+        return 1.0
     return np.sum(hits).item() / float(len(latency))
 
 
@@ -93,7 +96,7 @@ def sliding_window(timepoints: List[int], latency: List[Union[int, float]], comp
     return results
 
 
-def visualize_latency(timepoints: List[int], latency: List[Union[int, float]], save_path: str = "metrics.png", window_size: int = 5, hit_threshold: float = 0.0):
+def visualize_latency(timepoints: List[int], latency: List[Union[int, float]], save_path: str = "metrics.png", window_size: int = 5, window_stride: int = 1, hit_threshold: float = 0.0):
     """Visualize latency metrics and save the plots to a file.
 
     The temporal "resolution" can be changed by changing the `sliding_window` (must be odd).
@@ -102,8 +105,9 @@ def visualize_latency(timepoints: List[int], latency: List[Union[int, float]], s
     l = np.array(latency)
     timepoints_valid: List[int] = np.extract(l >= 0, np.array(timepoints)).tolist()
     latency_valid: List[Union[int, float]] = np.extract(l >= 0, l).tolist()
+    latency_hits: List[Union[int, float]] = np.extract(l > hit_threshold, l).tolist()
 
-    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(18, 8))
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(20, 8))
     fig.tight_layout(pad=3)
 
     hr = hit_ratio(latency, hit_threshold)
@@ -112,22 +116,23 @@ def visualize_latency(timepoints: List[int], latency: List[Union[int, float]], s
     ax[0][0].set_title(f"Ø Hit Rate ({hr*100:.1f} %)", fontsize=20)
 
     rt_m, rt_d = response_time(latency_valid, hit_threshold)
-    ax[0][1].hist(latency_valid)
+    ax[0][1].hist(latency_hits)
     ax[0][1].set_ylabel("#", rotation=0, fontsize=20)
-    ax[0][1].set_title(f"Ø Response Time Distribution (μ={rt_m:.2f}, σ={rt_d:.2f})", fontsize=20)
-    x = np.arange(np.min(latency_valid), np.max(latency_valid) + 1, 0.1)
-    ax[0][1].plot(x, norm.pdf(x, rt_m, rt_d))
+    ax[0][1].set_title(f"Ø Response Time Distribution excl. Hits (μ={rt_m:.2f}, σ={rt_d:.2f})", fontsize=20)
+    x = np.arange(np.min(latency_hits), np.max(latency_hits) + 1, 0.1)
+    if rt_d != 0.0:  # A density with zero deviation doesn't make any sense.
+        ax[0][1].plot(x, norm.pdf(x, rt_m, rt_d))
 
-    hr_sw = sliding_window(timepoints_valid, latency_valid, hit_ratio, 0.0, window_size)
-    t = np.arange(0, timepoints_valid[-1] + 1, 1)
+    hr_sw = sliding_window(timepoints_valid, latency_valid, hit_ratio, 0.0, window_size, window_stride, hit_threshold=hit_threshold)
+    t = np.arange(0, timepoints_valid[-1] + 1, window_stride)
     ax[1][0].plot(t, np.array(hr_sw) * 100)
     ax[1][0].set_ylabel("%", rotation=0, fontsize=20)
     ax[1][0].set_title(f"Ø Hit Rate over Time ({timepoints_valid[-1]+1} steps, Ø over {window_size})", fontsize=20)
 
-    rt_sw = sliding_window(timepoints_valid, latency_valid, response_time, (0.0, 0.0), window_size)
+    rt_sw = sliding_window(timepoints_valid, latency_valid, response_time, (0.0, 0.0), window_size, window_stride, hit_threshold=hit_threshold)
     rt_sw = np.array(rt_sw)[:, 0]  # Extract just the average response time and drop the deviation.
     ax[1][1].plot(t, rt_sw)
     ax[1][1].set_ylabel("Response Time", fontsize=20)
-    ax[1][1].set_title(f"Ø Response Time over Time ({timepoints_valid[-1]+1} steps, Ø over {window_size})", fontsize=20)
+    ax[1][1].set_title(f"Ø Response Time over Time excl. Hits ({timepoints_valid[-1]+1} steps, Ø over {window_size})", fontsize=20)
 
     fig.savefig(save_path)

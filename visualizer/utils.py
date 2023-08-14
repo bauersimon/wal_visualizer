@@ -23,10 +23,19 @@ def test(name, expected, actual):
         print(f"{OK}PASS{ENDC} {name}")
 
 
+def do_test() -> bool:
+    return "test" in argv
+
+
 def debug(msg: str, *args):
     if not "debug" in argv:
         return
     logger.log(logging.DEBUG, msg, *args)
+
+
+def write(file: str, *content):
+    with open(file, "w") as f:
+        f.write("".join(str(content)))
 
 
 def merge_indices(a: List[int], b: List[int]) -> List[int]:
