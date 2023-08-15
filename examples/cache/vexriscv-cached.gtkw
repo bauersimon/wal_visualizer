@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Tue Aug 15 08:43:27 2023
+[*] Tue Aug 15 10:32:19 2023
 [*]
 [dumpfile] "/home/simon/repos/wal_visualizer/examples/cache/vexriscv-cached.fst"
 [dumpfile_mtime] "Mon Jul 31 16:13:15 2023"
 [dumpfile_size] 15121160
 [savefile] "/home/simon/repos/wal_visualizer/examples/cache/vexriscv-cached.gtkw"
-[timestart] 81712
+[timestart] 208217
 [size] 1908 999
 [pos] 65503 65503
-*-2.000000 81700 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.000000 81902 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.VexRiscv.
 [sst_width] 294
@@ -19,6 +19,7 @@
 @28
 TOP.VexRiscv.IBusCachedPlugin_cache.clk
 @200
+-
 -ICache - CPU (BUS)
 -Input (from CPU)
 @28
@@ -26,25 +27,73 @@ TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isValid
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isStuck
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isRemoved
 @22
+[color] 3
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_pc[31:0]
 @200
 -Output (to CPU)
 @28
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_cacheMiss
-@23
-TOP.VexRiscv.IBusCachedPlugin_cache_io_cpu_decode_data[31:0]
 @22
+[color] 3
 TOP.VexRiscv.IBusCachedPlugin_cache_io_cpu_decode_physicalAddress[31:0]
+TOP.VexRiscv.IBusCachedPlugin_cache_io_cpu_decode_data[31:0]
 @200
 -PC "Prefetch"
 -Input (from CPU)
 @28
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_isValid
 @22
+[color] 3
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_pc[31:0]
 @200
 -Output (to CPU)
 @28
 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_prefetch_haltIt
+@200
+-
+-DCache - CPU (BUS)
+-Execute
+-Input (from CPU)
+@22
+[color] 3
+TOP.VexRiscv.dataCache_1_io_cpu_execute_address[31:0]
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_execute_args_wr
+TOP.VexRiscv.dataCache_1_io_cpu_execute_isValid
+@200
+-Output (to CPU)
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_execute_refilling
+TOP.VexRiscv.dataCache_1_io_cpu_execute_haltIt
+@200
+-Memory
+-Input (from CPU)
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_memory_isValid
+@22
+[color] 3
+TOP.VexRiscv.dataCache_1_io_cpu_memory_address[31:0]
+@200
+-Output (to CPU)
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_memory_isWrite
+@200
+-Write Back
+-Input (from CPU)
+@22
+[color] 3
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_address[31:0]
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_isValid
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_isWrite
+@22
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_storeData[31:0]
+@200
+-Output (to CPU)
+@22
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_data[31:0]
+@28
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_haltIt
+TOP.VexRiscv.dataCache_1_io_cpu_writeBack_isWrite
 [pattern_trace] 1
 [pattern_trace] 0

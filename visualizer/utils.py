@@ -1,4 +1,6 @@
+import faulthandler
 import logging
+import resource
 import sys
 from sys import argv
 from typing import List
@@ -12,6 +14,9 @@ if "debug" in argv:
 logger = logging.getLogger()
 
 sys.setrecursionlimit(10_000_000)
+faulthandler.enable()
+resource.setrlimit(resource.RLIMIT_DATA, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
 
 def test(name, expected, actual):
@@ -25,6 +30,10 @@ def test(name, expected, actual):
 
 def do_test() -> bool:
     return "test" in argv
+
+
+def native_wal() -> bool:
+    return "native" in argv
 
 
 def debug(msg: str, *args):

@@ -58,6 +58,7 @@
   (call utils.test "Merge Index" (list 5) (merge-idx (list 0 2 4 5 6 8) (list 1 3 5 7 9)))
   (exit 0))
 
+(print "Analyzing ICache...")
 (let ([clock (list)] [requests (list)] [responses (list)] [latencies (list)] [cycle 0])
   (set (clock (find (&&
   (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.clk@-1)
@@ -69,10 +70,36 @@
   (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isRemoved))))
   (responses (find (&&
   (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_cacheMiss)))))
-  ;; (set (requests (merge-idx clock requests)) (responses (merge-idx clock responses)))
-  (set (requests (call utils.merge_indices clock requests)) (responses (call utils.merge_indices clock responses)))
-  ;; (set (latencies (latency requests responses)))
-  (set (latencies (call utils.compute_latency requests responses (* cycle 1)))) ;; At least one cycle between request and response.
+  (print "#Request-Samples=" (length requests) " #Response-Samples=" (length responses))
+  (if (call utils.native_wal)
+    (set (requests (merge-idx clock requests)) (responses (merge-idx clock responses)))
+    (set (requests (call utils.merge_indices clock requests)) (responses (call utils.merge_indices clock responses))))
+  (if (call utils.native_wal)
+    (set (latencies (latency requests responses (* cycle 1))))
+    (set (latencies (call utils.compute_latency requests responses (* cycle 1))))) ;; At least one cycle between request and response.
   (print "#Requests=" (length requests) " #Responses=" (length responses) " #Latency-Samples=" (length latencies))
-  (call utils.write "../raw.txt" "Clock:" clock "Request:" requests "Response:" responses "Latency:" latencies)
-  (call plotting.visualize_latency requests latencies "../metrics.png" 999 499 cycle)) ;; Window, Stride, Hit Threshold
+  (call utils.write "../raw_icache.txt" "Clock:" clock "Request:" requests "Response:" responses "Latency:" latencies)
+  (call plotting.visualize_latency requests latencies "../metrics_icache.png" 999 499 (* cycle 1))) ;; Window, Stride, Hit Threshold
+
+(print "Analyzing DCache...")
+(let ([clock (list)] [requests (list)] [responses (list)] [latencies (list)] [cycle 0])
+  (set (clock (find (&&
+  (= 0 TOP.VexRiscv.dataCache_1.clk@-1)
+  (= 1 TOP.VexRiscv.dataCache_1.clk)))))
+  (set (cycle (- (second clock) (first clock)))) ;; cycle is clock[1] - clock[0]
+  (set (requests (find (&&
+  (= 1 TOP.VexRiscv.dataCache_1.io_cpu_execute_isValid)
+  (= 0 TOP.VexRiscv.dataCache_1.io_cpu_execute_args_wr))))
+  (responses (find (&&
+  (= 0 TOP.VexRiscv.dataCache_1.io_cpu_writeBack_haltIt)
+  (= 0 TOP.VexRiscv.dataCache_1.io_cpu_writeBack_isWrite)))))
+  (print "#Request-Samples=" (length requests) " #Response-Samples=" (length responses))
+  (if (call utils.native_wal)
+    (set (requests (merge-idx clock requests)) (responses (merge-idx clock responses)))
+    (set (requests (call utils.merge_indices clock requests)) (responses (call utils.merge_indices clock responses))))
+  (if (call utils.native_wal)
+    (set (latencies (latency requests responses (* cycle 2))))
+    (set (latencies (call utils.compute_latency requests responses (* cycle 2))))) ;; At least two cycles between request and response.
+  (print "#Requests=" (length requests) " #Responses=" (length responses) " #Latency-Samples=" (length latencies))
+  (call utils.write "../raw_dcache.txt" "Clock:" clock "Request:" requests "Response:" responses "Latency:" latencies)
+  (call plotting.visualize_latency requests latencies "../metrics_dcache.png" 999 499 (* cycle 2))) ;; Window, Stride, Hit Threshold
