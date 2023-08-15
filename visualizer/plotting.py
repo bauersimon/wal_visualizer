@@ -116,20 +116,20 @@ def visualize_latency(timepoints: List[int], latency: List[Union[int, float]], s
     ax[0][0].set_title(f"Ø Hit Rate ({hr*100:.1f} %)", fontsize=20)
 
     rt_m, rt_d = response_time(latency_valid, hit_threshold)
-    ax[0][1].hist(latency_hits)
+    bin_values, _, _ = ax[0][1].hist(latency_hits)
     ax[0][1].set_ylabel("#", rotation=0, fontsize=20)
     ax[0][1].set_title(f"Ø Response Time Distribution excl. Hits (μ={rt_m:.2f}, σ={rt_d:.2f})", fontsize=20)
     x = np.arange(np.min(latency_hits), np.max(latency_hits) + 1, 0.1)
     if rt_d != 0.0:  # A density with zero deviation doesn't make any sense.
-        ax[0][1].plot(x, norm.pdf(x, rt_m, rt_d))
+        ax[0][1].plot(x, norm.pdf(x, rt_m, rt_d) * np.max(bin_values))
 
-    hr_sw = sliding_window(timepoints_valid, latency_valid, hit_ratio, 0.0, window_size, window_stride, hit_threshold=hit_threshold)
+    hr_sw = sliding_window(timepoints_valid, latency_valid, hit_ratio, -1.0, window_size, window_stride, hit_threshold=hit_threshold)
     t = np.arange(0, timepoints_valid[-1] + 1, window_stride)
     ax[1][0].plot(t, np.array(hr_sw) * 100)
     ax[1][0].set_ylabel("%", rotation=0, fontsize=20)
     ax[1][0].set_title(f"Ø Hit Rate over Time ({timepoints_valid[-1]+1} steps, Ø over {window_size})", fontsize=20)
 
-    rt_sw = sliding_window(timepoints_valid, latency_valid, response_time, (0.0, 0.0), window_size, window_stride, hit_threshold=hit_threshold)
+    rt_sw = sliding_window(timepoints_valid, latency_valid, response_time, (-1.0, 0.0), window_size, window_stride, hit_threshold=hit_threshold)
     rt_sw = np.array(rt_sw)[:, 0]  # Extract just the average response time and drop the deviation.
     ax[1][1].plot(t, rt_sw)
     ax[1][1].set_ylabel("Response Time", fontsize=20)

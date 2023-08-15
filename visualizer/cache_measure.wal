@@ -23,12 +23,12 @@
 ; Latency.
 
 (defun latency
-  [idx-rq idx-rs]
+  [idx-rq idx-rs shortest-path]
   (cond
     ; Base case: empty list.
     [(&& (empty idx-rq) (empty idx-rs)) (list)]
     ; Append "-1" for as long as there are no responses anymore.
-    [(empty idx-rs) (+ (list -1) (latency (rest idx-rq) (list)))]
+    [(empty idx-rs) (+ (list -1) (latency (rest idx-rq) (list) shortest-path))]
     ; Done when there are no request anymore.
     [(empty idx-rq) (list)]
     ; Default: Compute latency.
@@ -36,23 +36,24 @@
      (let ([rq (first idx-rq)] [rs (first idx-rs)])
        (cond
          ; The response is for the next request.
-         [(&& (>= (length idx-rq) 2) (>= rs (second idx-rq)))
-          (+ (list -1) (latency (rest idx-rq) idx-rs))]
+         [(&& (>= (length idx-rq) 2) (>= rs (+ (second idx-rq) shortest-path)))
+          (+ (list -1) (latency (rest idx-rq) idx-rs shortest-path))]
          ; Valid response.
-         [(>= rs rq) (+ (list (- rs rq)) (latency (rest idx-rq) (rest idx-rs)))]
+         [(>= rs (+ rq shortest-path)) (+ (list (- rs rq)) (latency (rest idx-rq) (rest idx-rs) shortest-path))]
          ; Ignore invalid response.
-         [#t (latency idx-rq (rest idx-rs))]))]))
+         [#t (latency idx-rq (rest idx-rs) shortest-path)]))]))
 
 ; Tests.
 
 (when (call utils.do_test)
-  (call utils.test "Empty" (list) (latency (list) (list)))
-  (call utils.test "Simple" (list 0 1 4) (latency (list 1 3 5) (list 1 4 9)))
-  (call utils.test "No Responses End" (list 0 1 -1 -1) (latency (list 1 3 7 8) (list 1 4)))
-  (call utils.test "No Requests End" (list 0 1) (latency (list 1 3) (list 1 4 7 9)))
-  (call utils.test "No Response" (list 0 1 -1 1) (latency (list 1 3 7 8) (list 1 4 9)))
-  (call utils.test "Duplicated Response" (list 0 1 1) (latency (list 1 3 8) (list 1 4 7 9)))
-  (call utils.test "Complex" (list 0 2 -1 3 -1) (latency (list 1 3 8 10 15) (list 1 2 5 13)))
+  (call utils.test "Empty" (list) (latency (list) (list) 1))
+  (call utils.test "Simple" (list 1 2 4) (latency (list 1 3 5) (list 2 5 9) 1))
+  (call utils.test "No Responses End" (list 1 1 -1 -1) (latency (list 1 3 7 8) (list 2 4) 1))
+  (call utils.test "No Requests End" (list 1 1) (latency (list 1 3) (list 2 4 7 9) 1))
+  (call utils.test "No Response Middle" (list 1 1 -1 1) (latency (list 1 3 7 8) (list 2 4 9) 1))
+  (call utils.test "Duplicated Response" (list 1 1 1) (latency (list 1 3 8) (list 2 4 7 9) 1))
+  (call utils.test "Complex" (list 1 2 -1 3 -1) (latency (list 1 3 8 10 15) (list 1 2 5 13) 1))
+  (call utils.test "Increased Shortest Path" (list -1 2 -1 3 -1) (latency (list 1 3 8 10 15) (list 1 2 5 13) 2))
   (call utils.test "Filter" (list 0 2 3) (filter int-pos (list 0 -1 2 -1 3 -1)))
   (call utils.test "Merge Index" (list 5) (merge-idx (list 0 2 4 5 6 8) (list 1 3 5 7 9)))
   (exit 0))
@@ -67,11 +68,11 @@
   (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isStuck)
   (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_isRemoved))))
   (responses (find (&&
-  (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_cacheMiss)
-  (= TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_fetch_pc@(- 0 cycle) TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_physicalAddress)))))
+  (= 0 TOP.VexRiscv.IBusCachedPlugin_cache.io_cpu_decode_cacheMiss)))))
   ;; (set (requests (merge-idx clock requests)) (responses (merge-idx clock responses)))
   (set (requests (call utils.merge_indices clock requests)) (responses (call utils.merge_indices clock responses)))
   ;; (set (latencies (latency requests responses)))
-  (set (latencies (call utils.compute_latency requests responses)))
+  (set (latencies (call utils.compute_latency requests responses (* cycle 1)))) ;; At least one cycle between request and response.
+  (print "#Requests=" (length requests) " #Responses=" (length responses) " #Latency-Samples=" (length latencies))
   (call utils.write "../raw.txt" "Clock:" clock "Request:" requests "Response:" responses "Latency:" latencies)
-  (call plotting.visualize_latency requests latencies "../metrics.png" 99 9))
+  (call plotting.visualize_latency requests latencies "../metrics.png" 999 499 cycle)) ;; Window, Stride, Hit Threshold

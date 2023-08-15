@@ -56,7 +56,7 @@ def merge_indices(a: List[int], b: List[int]) -> List[int]:
     return merged
 
 
-def compute_latency(request: List[int], response: List[int]) -> List[int]:
+def compute_latency(request: List[int], response: List[int], shortest_path: int = 1) -> List[int]:
     latencies: List[int] = []
 
     i_rq = 0
@@ -75,14 +75,14 @@ def compute_latency(request: List[int], response: List[int]) -> List[int]:
 
         if i_rq < len(request)-1:
             req_next = request[i_rq+1]
-            if res >= req_next:
+            if res >= req_next + shortest_path:
                 debug("latency: RQ=%d,RS=%d (RQ+1=%d)\tRS >= RQ+\t-> -1 (RQ++)", req, res, req_next)
                 # Response is for next request.
                 latencies.append(-1)
                 i_rq += 1
                 continue
 
-        if res >= req:
+        if res >= req + shortest_path:
             debug("latency: RQ=%d,RS=%d (RQ+1=%d)\tRS >= RQ\t-> %d (RQ++,RS++)", req, res, req_next, res-req)
             # Valid response.
             latencies.append(res - req)
